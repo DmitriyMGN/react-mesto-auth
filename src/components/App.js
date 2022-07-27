@@ -7,11 +7,13 @@ import EditProfilePopup from "./EditProfilePopup.js";
 import EditAvatarPopup from "./EditAvatarPopup.js";
 import AddPlacePopup from "./AddPlacePopup.js";
 import ImagePopup from "./ImagePopup.js";
+import Register from "./Register.js";
 import api from "../utils/api.js";
 import ProtectedRoute from "./ProtectedRoute";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 import { useState, useEffect } from "react";
 import { Route, Switch, Redirect } from "react-router-dom";
+
 
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
@@ -128,10 +130,13 @@ function App() {
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
-      <Header />
+      <Header loggedIn={loggedIn} />
         <Switch>
           <Route path="/sign-in">
             <Login />
+          </Route>
+          <Route path="/sign-up">
+            <Register />
           </Route>
     
           <ProtectedRoute

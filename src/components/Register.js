@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
+import { NavLink } from 'react-router-dom';
 
-
-function Login() {
+function Register() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
 
@@ -15,16 +15,16 @@ function Login() {
 
   return (
 <div className="login"> 
-    <h2 className="login__title">Вход</h2>
+    <h2 className="login__title">Регистрация</h2>
       <form className="login__form">
         <input className="login__input" placeholder="Email"></input>  
         <input className="login__input" placeholder="Пароль"></input>
-        <button className="login__button" type="submit">Войти</button>
+        <button className="login__button" type="submit">Зарегестрироваться</button>
       </form>  
+      <NavLink className="" to="/sign-in">Уже зарегистрированы? Войти</NavLink>
 </div>
-
 
   )
 }
 
-export default Login;
+export default Register;
