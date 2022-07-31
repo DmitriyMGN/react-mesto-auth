@@ -12,7 +12,7 @@ import api from "../utils/api.js";
 import ProtectedRoute from "./ProtectedRoute";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 import { useState, useEffect } from "react";
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect, useHistory } from "react-router-dom";
 
 
 function App() {
@@ -23,6 +23,8 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [email, setEmail] = useState(null);
+  const history = useHistory()
 
   function updateData(item) {
     const data = {
@@ -127,18 +129,41 @@ function App() {
       });
   }
 
+  function handleLogin() {
+    setLoggedIn(true)
+  }
+
+  function signOut(){
+    localStorage.removeItem('jwt');
+    history.push('/sign-in');
+  }
+
+  handleTokenCheck()
+
+  function handleTokenCheck(){
+    if (localStorage.getItem('jwt')){
+    const jwt = localStorage.getItem('jwt');
+      api.checkToken(jwt)
+      .then((res) => {
+        handleLogin()
+        setEmail(res.data.email)
+        history.push('/')
+      })
+   }
+  }
+
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
-      <Header loggedIn={loggedIn} />
+      <Header signOut={signOut} email={email} />
         <Switch>
           <Route path="/sign-in">
-            <Login />
+            <Login OnloggedIn={handleLogin} />
           </Route>
           <Route path="/sign-up">
             <Register />
           </Route>
-    
+  
           <ProtectedRoute
             path="/"
             loggedIn={loggedIn}
@@ -151,7 +176,11 @@ function App() {
             onCardLike={handleCardLike}
             onCardDelete={handleCardDelete}
           />
-          <EditProfilePopup
+          <Route exact path="">
+            {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
+          </Route>
+        </Switch>
+        <EditProfilePopup
             isOpen={isEditProfilePopupOpen}
             onClose={closeAllPopups}
             onUpdateUser={handleUpdateUser}
@@ -172,10 +201,6 @@ function App() {
             onUpdateAvatar={handleUpdateAvatar}
           />
           <ImagePopup onClose={closeAllPopups} card={selectedCard} />
-          <Route exact path="">
-            {loggedIn ? <Redirect to="/" /> : <Redirect to="/sign-in" />}
-          </Route>
-        </Switch>
         <Footer />
       </div>
     </CurrentUserContext.Provider>

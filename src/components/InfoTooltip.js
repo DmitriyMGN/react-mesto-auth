@@ -2,7 +2,6 @@ function InfoToolTip (props) {
   return (
     <div className={`
     popup 
-    popup_place_card-image
     ${props.card ? "popup_sucess" : "popup_fail"}
     ${Object.keys(props.card).length ? "popup_open" : ""}
     `}
