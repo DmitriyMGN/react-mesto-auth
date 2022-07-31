@@ -14,7 +14,6 @@ import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 import { useState, useEffect } from "react";
 import { Route, Switch, Redirect, useHistory } from "react-router-dom";
 
-
 function App() {
   const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
   const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
@@ -23,8 +22,49 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [cards, setCards] = useState([]);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [email, setEmail] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  
+  const [loggedEmail, setLoggedEmail] = useState(null);
   const history = useHistory()
+
+  function handleChangeEmail(e) {
+    setEmail(e.target.value);
+  }
+
+  function handleChangePassword(e) {
+    setPassword(e.target.value);
+  }
+
+  function handleSubmitLogin(e) {
+    e.preventDefault();
+    if (!email || !password) {
+      return;
+    }
+    api
+      .authorize(password, email)
+      .then((jwt) => {
+        if (jwt) {
+          setEmail("");
+          setPassword("");
+          setLoggedIn(true);
+          history.push("/");
+        }
+      })
+      .catch((err) => console.log(err));
+  }
+
+  function handleSubmitRegister(e) {
+    e.preventDefault();
+    setEmail("");
+    setPassword("");
+    api.register(password, email)
+      .then(() => {
+      })
+      .catch(() => {
+      })
+    }
+
 
   function updateData(item) {
     const data = {
@@ -45,6 +85,22 @@ function App() {
         console.log(err);
       });
   }, []);
+
+  useEffect(() => {
+    handleTokenCheck()
+  });
+
+  function handleTokenCheck(){
+    if (localStorage.getItem('jwt')){
+    const jwt = localStorage.getItem('jwt');
+      api.checkToken(jwt)
+      .then((res) => {
+        handleLogin()
+        setLoggedEmail(res.data.email)
+        history.push('/')
+      })
+   }
+  }
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(!isEditAvatarPopupOpen);
@@ -138,30 +194,27 @@ function App() {
     history.push('/sign-in');
   }
 
-  handleTokenCheck()
-
-  function handleTokenCheck(){
-    if (localStorage.getItem('jwt')){
-    const jwt = localStorage.getItem('jwt');
-      api.checkToken(jwt)
-      .then((res) => {
-        handleLogin()
-        setEmail(res.data.email)
-        history.push('/')
-      })
-   }
-  }
-
   return (
     <CurrentUserContext.Provider value={currentUser}>
       <div className="page">
-      <Header signOut={signOut} email={email} />
+      <Header signOut={signOut} email={loggedEmail} />
         <Switch>
           <Route path="/sign-in">
-            <Login OnloggedIn={handleLogin} />
+            <Login 
+            onLogin={handleSubmitLogin} 
+            email={email}
+            password={password}
+            handleChangeEmail= {handleChangeEmail}
+            handleChangePassword = {handleChangePassword}
+            />
           </Route>
           <Route path="/sign-up">
-            <Register />
+            <Register 
+                  onRegister={handleSubmitRegister} 
+                  email={email}
+                  password={password}
+                  handleChangeEmail= {handleChangeEmail}
+                  handleChangePassword = {handleChangePassword}/>
           </Route>
   
           <ProtectedRoute
