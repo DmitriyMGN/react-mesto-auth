@@ -10,6 +10,7 @@ import ImagePopup from "./ImagePopup.js";
 import Register from "./Register.js";
 import InfoToolTip from "./InfoTooltip.js";
 import api from "../utils/api.js";
+import Auth from "../utils/auth.js";
 import ProtectedRoute from "./ProtectedRoute";
 import { CurrentUserContext } from "../contexts/CurrentUserContext.js";
 import { useState, useEffect } from "react";
@@ -30,6 +31,8 @@ function App() {
   const [loggedEmail, setLoggedEmail] = useState(null);
   const history = useHistory();
 
+  const auth = new Auth();
+
   function handleChangeEmail(e) {
     setEmail(e.target.value);
   }
@@ -43,7 +46,7 @@ function App() {
     if (!email || !password) {
       return;
     }
-    api
+    auth
       .authorize(password, email)
       .then((jwt) => {
         if (jwt) {
@@ -60,15 +63,15 @@ function App() {
     e.preventDefault();
     setEmail("");
     setPassword("");
-    api
+    auth
       .register(password, email)
       .then(() => {
-        handleLogin()
-        handleInfoToolTip()
+        handleLogin();
+        handleInfoToolTip();
       })
       .catch(() => {
-        setLoggedIn(false)
-        handleInfoToolTip()
+        setLoggedIn(false);
+        handleInfoToolTip();
       });
   }
 
@@ -94,16 +97,18 @@ function App() {
 
   useEffect(() => {
     handleTokenCheck();
-  });
+  }, []);
 
   function handleTokenCheck() {
     if (localStorage.getItem("jwt")) {
       const jwt = localStorage.getItem("jwt");
-      api.checkToken(jwt).then((res) => {
+      auth.checkToken(jwt)
+      .then((res) => {
         handleLogin();
         setLoggedEmail(res.data.email);
-        history.push("/");
-      });
+        history.push("/")
+      })
+       .catch((err) => console.log(err));
     }
   }
 
@@ -131,7 +136,7 @@ function App() {
     setIsEditProfilePopupOpen(false);
     setIsEditAvatarPopupOpen(false);
     setIsAddPlacePopupOpen(false);
-    setIsInfoToolTipPopupOpen(false)
+    setIsInfoToolTipPopupOpen(false);
     setSelectedCard({});
   }
 
@@ -227,7 +232,6 @@ function App() {
               handleChangePassword={handleChangePassword}
             />
           </Route>
-
           <ProtectedRoute
             path="/"
             loggedIn={loggedIn}
@@ -260,13 +264,12 @@ function App() {
           onClose={closeAllPopups}
           onUpdateAvatar={handleUpdateAvatar}
         />
-        <ImagePopup 
-        onClose={closeAllPopups} 
-        card={selectedCard} />
-        <InfoToolTip 
-        isOpen={isInfoToolTipPopupOpen} 
-        onClose={closeAllPopups}
-        loggedIn={loggedIn} />
+        <ImagePopup onClose={closeAllPopups} card={selectedCard} />
+        <InfoToolTip
+          isOpen={isInfoToolTipPopupOpen}
+          onClose={closeAllPopups}
+          loggedIn={loggedIn}
+        />
         <Footer />
       </div>
     </CurrentUserContext.Provider>
