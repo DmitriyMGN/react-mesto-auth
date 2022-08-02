@@ -1,3 +1,4 @@
+import baseUrl from "./utils.js"
 class Auth {
   
   _checkResponse(res) {
@@ -8,7 +9,7 @@ class Auth {
   }
 
   register(password, email) {
-    return fetch("https://auth.nomoreparties.co/signup", {
+    return fetch(`${baseUrl}/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -22,7 +23,7 @@ class Auth {
   }
 
   authorize(password, email) {
-    return fetch("https://auth.nomoreparties.co/signin", {
+    return fetch(`${baseUrl}/signin`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -32,18 +33,17 @@ class Auth {
           email,
         }),
       })
-      .then((response) => response.json())
+      .then(this._checkResponse)
       .then((data) => {
         if (data.token) {
           localStorage.setItem("jwt", data.token);
           return localStorage.jwt;
         }
       })
-      .catch((err) => console.log(err));
   }
 
   checkToken(token) {
-    return fetch("https://auth.nomoreparties.co/users/me", {
+    return fetch(`${baseUrl}/users/me`, {
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${token}`

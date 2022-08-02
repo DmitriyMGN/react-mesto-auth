@@ -52,8 +52,7 @@ function App() {
         if (jwt) {
           setEmail("");
           setPassword("");
-          setLoggedIn(true);
-          history.push("/");
+          handleTokenCheck();
         }
       })
       .catch((err) => console.log(err));
